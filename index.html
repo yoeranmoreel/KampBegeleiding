@@ -125,7 +125,8 @@ async function DocumentenPage() {
 
   try {
     const res = await fetch(`${API_BASE}?action=getDocumenten`);
-    docs = await res.json();
+  const data = await res.json();
+  docs = Array.isArray(data) ? data : data.data || [];
   } catch (e) {
     return `<p class="text-red-600">Documenten konden niet geladen worden.</p>`;
   }
