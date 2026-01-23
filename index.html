@@ -62,12 +62,15 @@ const navItems = [
   { id: 'admin', name: 'Admin', icon: 'shield' },
 ];
 
-function setPage(page) {
-  activePage = page;
-  sidebarOpen = false;
+  function getActivePage() { 
+    const hash = window.location.hash.replace('#', ''); 
+    return hash || 'start'; }
+
+  function setPage(page) {
+  window.location.hash = page;
   mobileMenu.classList.add('hidden');
-  render();
 }
+
 
 /* ================= START ================= */
 
@@ -239,6 +242,7 @@ function renderNav() {
 }
 
 async function render() {
+  activePage = getActivePage();
   renderNav();
 
   let content = '';
@@ -252,12 +256,15 @@ async function render() {
   lucide.createIcons();
 }
 
+
 menuBtn.onclick = () => {
   sidebarOpen = !sidebarOpen;
   mobileMenu.classList.toggle('hidden', !sidebarOpen);
 };
 
+window.addEventListener('hashchange', render);
 render();
+
 </script>
 
 </body>
