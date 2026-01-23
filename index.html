@@ -98,24 +98,67 @@ function StartPage() {
   `;
 }
 
+<script>
 async function DocumentenPage() {
-  const res = await fetch(`${API_BASE}?action=getDocumenten`);
-  const docs = await res.json();
+  const container = document.getElementById('app');
 
-  return `
-    <h1 class="text-3xl font-semibold mb-6">Documenten</h1>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      ${docs.map(d => `
-        <div class="bg-white border rounded-lg p-5">
-          <h3 class="font-medium">${d.titel}</h3>
-          <a href="${d.driveUrl}" target="_blank" class="text-sm text-gray-600 underline">
-            Bekijk document
-          </a>
-        </div>
-      `).join('')}
-    </div>
+  container.innerHTML = `
+    <div class="text-gray-600">Documenten laden…</div>
   `;
+
+  try {
+    const res = await fetch(`${API_BASE}?action=getDocumenten`);
+    const documenten = await res.json();
+
+    if (!Array.isArray(documenten) || documenten.length === 0) {
+      container.innerHTML = `<p class="text-gray-600">Nog geen documenten.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-3xl font-semibold text-gray-900">Documenten</h1>
+            <p class="text-gray-600 mt-1">
+              Belangrijke informatie en protocollen
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${documenten.map(doc => `
+            <div class="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-all">
+              <div class="flex justify-between items-start mb-3">
+                <span class="text-sm font-medium text-gray-700">
+                  ${doc.type || 'Document'}
+                </span>
+              </div>
+
+              <h3 class="font-medium text-gray-900 mb-3">
+                ${doc.titel || 'Zonder titel'}
+              </h3>
+
+              ${doc.driveUrl ? `
+                <a href="${doc.driveUrl}" target="_blank"
+                   class="text-sm text-gray-600 hover:text-gray-900 underline">
+                  Bekijk document →
+                </a>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <p class="text-red-600">Fout bij laden van documenten.</p>
+    `;
+  }
 }
+</script>
+
 
 function renderNav() {
   const navHtml = navItems.map(i => `
@@ -134,7 +177,11 @@ async function render() {
 
   let content = '';
   if (activePage === 'start') content = StartPage();
-  if (activePage === 'documenten') content = await DocumentenPage();
+  if (activePage === 'documenten') {
+  DocumentenPage();
+  return;
+}
+
   if (activePage === 'planningen') content = '<h1 class="text-3xl">Planning</h1>';
   if (activePage === 'ideeen') content = '<h1 class="text-3xl">Ideeën</h1>';
   if (activePage === 'admin') content = '<h1 class="text-3xl">Admin</h1>';
