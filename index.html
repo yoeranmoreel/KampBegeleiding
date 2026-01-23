@@ -65,13 +65,28 @@ const navItems = [
 function setPage(page) {
   activePage = page;
   sidebarOpen = false;
+  mobileMenu.classList.add('hidden');
   render();
 }
 
+/* ================= START ================= */
+
 function StartPage() {
   const today = new Date().toLocaleDateString('nl-NL', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
+
+  const planning = [
+    ['09:00','Ontbijt & briefing','Eetzaal','Lisa'],
+    ['10:30','Speurtocht in het bos','Bos','Mark & Sarah'],
+    ['12:30','Lunch','Eetzaal','Keukenteam'],
+    ['14:00','Zwemmen bij het meer','Meer','Tom & Lisa'],
+    ['18:30','Diner','Eetzaal','Keukenteam'],
+    ['20:00','Kampvuur','Weide','Yoeran'],
+  ];
 
   return `
     <div class="space-y-8">
@@ -82,51 +97,145 @@ function StartPage() {
 
       <h2 class="text-xl font-medium">Planning van vandaag</h2>
 
-      ${[
-        ['09:00','Ontbijt & briefing','Eetzaal','Lisa'],
-        ['10:30','Speurtocht','Bos','Mark & Sarah'],
-        ['12:30','Lunch','Eetzaal','Keukenteam'],
-        ['14:00','Zwemmen','Meer','Tom & Lisa'],
-        ['18:30','Diner','Eetzaal','Keukenteam'],
-      ].map(item => `
-        <div class="bg-white border rounded-lg p-4 space-y-1">
-          <div class="font-medium">${item[0]} – ${item[1]}</div>
-          <div class="text-sm text-gray-600">${item[2]} • ${item[3]}</div>
-        </div>
-      `).join('')}
+      <div class="space-y-3">
+        ${planning.map(p => `
+          <div class="bg-white border rounded-lg p-4">
+            <div class="font-medium">${p[0]} – ${p[1]}</div>
+            <div class="text-sm text-gray-600">${p[2]} • ${p[3]}</div>
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
 }
+
+/* ================= DOCUMENTEN ================= */
 
 async function DocumentenPage() {
-  const res = await fetch(`${API_BASE}?action=getDocumenten`);
-  const docs = await res.json();
+  let docs = [];
+
+  try {
+    const res = await fetch(`${API_BASE}?action=getDocumenten`);
+    docs = await res.json();
+  } catch (e) {
+    return `<p class="text-red-600">Documenten konden niet geladen worden.</p>`;
+  }
+
+  if (!Array.isArray(docs) || docs.length === 0) {
+    return `<p class="text-gray-600">Nog geen documenten.</p>`;
+  }
 
   return `
-    <h1 class="text-3xl font-semibold mb-6">Documenten</h1>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      ${docs.map(d => `
-        <div class="bg-white border rounded-lg p-5">
-          <h3 class="font-medium">${d.titel}</h3>
-          <a href="${d.driveUrl}" target="_blank" class="text-sm text-gray-600 underline">
-            Bekijk document
-          </a>
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-3xl font-semibold">Documenten</h1>
+        <p class="text-gray-600">Belangrijke informatie en protocollen</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${docs.map(d => `
+          <div class="bg-white border rounded-lg p-5 hover:shadow-sm">
+            <h3 class="font-medium mb-2">${d.titel || 'Zonder titel'}</h3>
+            ${d.driveUrl ? `
+              <a href="${d.driveUrl}" target="_blank"
+                 class="text-sm text-gray-600 underline">
+                Bekijk document →
+              </a>` : ''
+            }
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ================= PLANNINGEN ================= */
+
+function PlanningenPage() {
+  const dagen = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag'];
+
+  return `
+    <div class="space-y-6">
+      <h1 class="text-3xl font-semibold">Volledige planning</h1>
+
+      ${dagen.map(dag => `
+        <div class="space-y-2">
+          <h2 class="text-lg font-medium">${dag}</h2>
+          <div class="space-y-2">
+            ${[
+              ['09:00 - 10:00','Ontbijt'],
+              ['10:30 - 12:30','Ochtendactiviteit'],
+              ['12:30 - 14:00','Lunch'],
+              ['14:00 - 17:00','Middagactiviteit'],
+              ['20:00 - 22:00','Avondprogramma'],
+            ].map(item => `
+              <div class="bg-white border rounded-lg p-3 flex justify-between">
+                <span class="text-sm text-gray-600">${item[0]}</span>
+                <span class="font-medium">${item[1]}</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
       `).join('')}
     </div>
   `;
 }
 
+/* ================= IDEEËN ================= */
+
+function IdeenPage() {
+  const ideeen = [
+    ['Capture the Flag','Spel','60 min','20-40'],
+    ['Armbandjes maken','Knutsel','45 min','10-20'],
+    ['Voetbaltoernooi','Sport','120 min','16-32'],
+    ['Kampvuurverhalen','Avond','60 min','Iedereen'],
+  ];
+
+  return `
+    <div class="space-y-6">
+      <h1 class="text-3xl font-semibold">Ideeën</h1>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        ${ideeen.map(i => `
+          <div class="bg-white border rounded-lg p-5">
+            <div class="text-xs text-gray-500 mb-1">${i[1]}</div>
+            <h3 class="font-medium mb-2">${i[0]}</h3>
+            <div class="text-sm text-gray-600">${i[2]} • ${i[3]}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ================= ADMIN ================= */
+
+function AdminPage() {
+  return `
+    <div class="space-y-6">
+      <h1 class="text-3xl font-semibold">Admin</h1>
+      <div class="bg-white border rounded-lg p-6">
+        <p class="text-gray-600">Beheerfuncties komen hier.</p>
+      </div>
+    </div>
+  `;
+}
+
+/* ================= RENDER ================= */
+
 function renderNav() {
-  const navHtml = navItems.map(i => `
+  const html = navItems.map(i => `
     <button onclick="setPage('${i.id}')"
-      class="flex items-center gap-2 px-4 py-2 rounded-lg ${activePage === i.id ? 'bg-gray-100' : ''}">
-      <i data-lucide="${i.icon}"></i>${i.name}
+      class="flex items-center gap-2 px-4 py-2 rounded-lg ${
+        activePage === i.id ? 'bg-gray-100' : ''
+      }">
+      <i data-lucide="${i.icon}"></i>
+      ${i.name}
     </button>
   `).join('');
 
-  desktopNav.innerHTML = navHtml;
-  mobileNav.innerHTML = navHtml;
+  desktopNav.innerHTML = html;
+  mobileNav.innerHTML = html;
 }
 
 async function render() {
@@ -135,9 +244,9 @@ async function render() {
   let content = '';
   if (activePage === 'start') content = StartPage();
   if (activePage === 'documenten') content = await DocumentenPage();
-  if (activePage === 'planningen') content = '<h1 class="text-3xl">Planning</h1>';
-  if (activePage === 'ideeen') content = '<h1 class="text-3xl">Ideeën</h1>';
-  if (activePage === 'admin') content = '<h1 class="text-3xl">Admin</h1>';
+  if (activePage === 'planningen') content = PlanningenPage();
+  if (activePage === 'ideeen') content = IdeenPage();
+  if (activePage === 'admin') content = AdminPage();
 
   document.getElementById('app').innerHTML = content;
   lucide.createIcons();
@@ -150,5 +259,6 @@ menuBtn.onclick = () => {
 
 render();
 </script>
+
 </body>
 </html>
