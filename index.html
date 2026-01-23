@@ -66,6 +66,12 @@ const navItems = [
     const hash = window.location.hash.replace('#', ''); 
     return hash || 'start'; }
 
+function getRouteParts() {
+  const hash = window.location.hash.replace('#', '');
+  return hash.split('/').filter(Boolean);
+}
+
+  
   function setPage(page) {
   window.location.hash = page;
   mobileMenu.classList.add('hidden');
@@ -124,33 +130,68 @@ async function DocumentenPage() {
     return `<p class="text-red-600">Documenten konden niet geladen worden.</p>`;
   }
 
-  if (!Array.isArray(docs) || docs.length === 0) {
-    return `<p class="text-gray-600">Nog geen documenten.</p>`;
-  }
-
   return `
     <div class="space-y-6">
-      <div>
-        <h1 class="text-3xl font-semibold">Documenten</h1>
-        <p class="text-gray-600">Belangrijke informatie en protocollen</p>
-      </div>
+      <h1 class="text-3xl font-semibold">Documenten</h1>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         ${docs.map(d => `
-          <div class="bg-white border rounded-lg p-5 hover:shadow-sm">
-            <h3 class="font-medium mb-2">${d.titel || 'Zonder titel'}</h3>
-            ${d.driveUrl ? `
-              <a href="${d.driveUrl}" target="_blank"
-                 class="text-sm text-gray-600 underline">
-                Bekijk document →
-              </a>` : ''
-            }
-          </div>
+          <button
+            onclick="window.location.hash='documenten/${d.id}'"
+            class="text-left w-full bg-white border rounded-lg p-5 hover:shadow-sm"
+          >
+            <h3 class="font-medium mb-2">${d.titel}</h3>
+            <span class="text-sm text-gray-600 underline">
+              Bekijk details →
+            </span>
+          </button>
         `).join('')}
       </div>
     </div>
   `;
 }
+
+async function DocumentDetailPage(documentId) {
+  let docs = [];
+
+  try {
+    const res = await fetch(`${API_BASE}?action=getDocumenten`);
+    docs = await res.json();
+  } catch (e) {
+    return `<p class="text-red-600">Document kon niet geladen worden.</p>`;
+  }
+
+  const doc = docs.find(d => String(d.id) === String(documentId));
+
+  if (!doc) {
+    return `<p class="text-gray-600">Document niet gevonden.</p>`;
+  }
+
+  return `
+    <div class="space-y-6">
+      <button onclick="setPage('documenten')"
+        class="text-sm text-gray-600 underline">
+        ← Terug naar documenten
+      </button>
+
+      <div class="bg-white border rounded-lg p-6 space-y-4">
+        <h1 class="text-3xl font-semibold">${doc.titel}</h1>
+
+        ${doc.type ? `
+          <div class="text-sm text-gray-500">Type: ${doc.type}</div>
+        ` : ''}
+
+        ${doc.driveUrl ? `
+          <a href="${doc.driveUrl}" target="_blank"
+             class="inline-block mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg">
+            Open document
+          </a>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
 
 /* ================= PLANNINGEN ================= */
 
@@ -242,15 +283,24 @@ function renderNav() {
 }
 
 async function render() {
-  activePage = getActivePage();
-  renderNav();
+const route = getRouteParts();
+activePage = route[0] || 'start';
 
-  let content = '';
-  if (activePage === 'start') content = StartPage();
-  if (activePage === 'documenten') content = await DocumentenPage();
-  if (activePage === 'planningen') content = PlanningenPage();
-  if (activePage === 'ideeen') content = IdeenPage();
-  if (activePage === 'admin') content = AdminPage();
+renderNav();
+
+let content = '';
+
+if (activePage === 'start') content = StartPage();
+if (activePage === 'documenten' && route.length === 1) {
+  content = await DocumentenPage();
+}
+if (activePage === 'documenten' && route.length === 2) {
+  content = await DocumentDetailPage(route[1]);
+}
+if (activePage === 'planningen') content = PlanningenPage();
+if (activePage === 'ideeen') content = IdeenPage();
+if (activePage === 'admin') content = AdminPage();
+
 
   document.getElementById('app').innerHTML = content;
   lucide.createIcons();
