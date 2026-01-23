@@ -131,9 +131,55 @@ async function DocumentenPage() {
   }
 
   return `
-    <div class="space-y-6">
+    <div class="space-y-8">
+
+      <!-- Titel -->
       <h1 class="text-3xl font-semibold">Documenten</h1>
 
+      <!-- Nieuw document knop -->
+      <div>
+        <button
+          id="newDocBtn"
+          class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+          + Nieuw document
+        </button>
+      </div>
+
+      <!-- Nieuw document formulier -->
+      <div
+        id="newDocForm"
+        class="hidden bg-white border rounded-lg p-6 space-y-4 max-w-lg"
+      >
+        <input
+          id="docTitle"
+          type="text"
+          placeholder="Titel"
+          class="w-full border rounded-lg px-3 py-2"
+        />
+
+        <input
+          id="docType"
+          type="text"
+          placeholder="Type (bijv. Programma, Handleiding)"
+          class="w-full border rounded-lg px-3 py-2"
+        />
+
+        <input
+          id="docUrl"
+          type="text"
+          placeholder="Google Drive link"
+          class="w-full border rounded-lg px-3 py-2"
+        />
+
+        <button
+          id="saveDocBtn"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500"
+        >
+          Document opslaan
+        </button>
+      </div>
+
+      <!-- Documenten grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         ${docs.map(d => `
           <button
@@ -147,9 +193,11 @@ async function DocumentenPage() {
           </button>
         `).join('')}
       </div>
+
     </div>
   `;
 }
+
 
 async function DocumentDetailPage(documentId) {
   let docs = [];
@@ -305,6 +353,37 @@ if (activePage === 'admin') content = AdminPage();
   document.getElementById('app').innerHTML = content;
   lucide.createIcons();
 }
+
+  document.addEventListener('click', async (e) => {
+  if (e.target.id === 'newDocBtn') {
+    document.getElementById('newDocForm').classList.toggle('hidden');
+  }
+
+  if (e.target.id === 'saveDocBtn') {
+    const titel = document.getElementById('docTitle').value.trim();
+    const type = document.getElementById('docType').value.trim();
+    const driveUrl = document.getElementById('docUrl').value.trim();
+
+    if (!titel) {
+      alert('Titel is verplicht');
+      return;
+    }
+
+    try {
+      await fetch(
+        `${API_BASE}?action=addDocument` +
+        `&titel=${encodeURIComponent(titel)}` +
+        `&type=${encodeURIComponent(type)}` +
+        `&driveUrl=${encodeURIComponent(driveUrl)}`
+      );
+
+      alert('Document toegevoegd');
+      render();
+    } catch (err) {
+      alert('Toevoegen mislukt');
+    }
+  }
+});
 
 
 menuBtn.onclick = () => {
