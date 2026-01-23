@@ -1,415 +1,154 @@
-import React, { useState, useEfect } from 'react';
-import { Home, FileText, Calendar, Lightbulb, Shield, User, Menu, X, Clock, MapPin, Users, ChevronRight } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Marimba Kamp Portaal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-export default function MarimbaKampPortaal() {
-  const [activePage, setActivePage] = useState('start');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  const API_BASE =
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white">⛺</div>
+        <h1 class="text-sm font-semibold text-gray-900 hidden sm:block">Marimba Kamp</h1>
+      </div>
+
+      <nav class="hidden md:flex gap-1" id="desktopNav"></nav>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-3 px-3 py-1.5 bg-gray-100 rounded-lg">
+          <div class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center text-white text-sm">Y</div>
+          <span class="text-sm font-medium">Yoeran</span>
+        </div>
+        <button id="menuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="mobileMenu" class="hidden fixed inset-0 z-40">
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-xl p-6 space-y-2 mt-16" id="mobileNav"></div>
+</div>
+
+<!-- MAIN -->
+<main id="app" class="max-w-7xl mx-auto px-6 py-8"></main>
+
+<script>
+const API_BASE =
   'https://script.google.com/macros/s/AKfycby5rKD9_UU9WssYazJ63G7m5QSW-0lUslmUmYGgiT_TurEmuksF58TceXANEwjAvNMA/exec';
 
-  // Navigation
-  const navItems = [
-    { id: 'start', name: 'Start', icon: Home },
-    { id: 'documenten', name: 'Documenten', icon: FileText },
-    { id: 'planningen', name: 'Planningen', icon: Calendar },
-    { id: 'ideeen', name: 'Ideeën', icon: Lightbulb },
-    { id: 'admin', name: 'Admin', icon: Shield },
-  ];
+let activePage = 'start';
+let sidebarOpen = false;
 
-  // Today's planning
-  const todayDate = new Date().toLocaleDateString('nl-NL', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+const navItems = [
+  { id: 'start', name: 'Start', icon: 'home' },
+  { id: 'documenten', name: 'Documenten', icon: 'file-text' },
+  { id: 'planningen', name: 'Planningen', icon: 'calendar' },
+  { id: 'ideeen', name: 'Ideeën', icon: 'lightbulb' },
+  { id: 'admin', name: 'Admin', icon: 'shield' },
+];
+
+function setPage(page) {
+  activePage = page;
+  sidebarOpen = false;
+  render();
+}
+
+function StartPage() {
+  const today = new Date().toLocaleDateString('nl-NL', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const StartPage = () => (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-500">Vandaag</p>
-        <h1 className="text-4xl font-semibold text-gray-900">{todayDate}</h1>
+  return `
+    <div class="space-y-8">
+      <div>
+        <p class="text-sm text-gray-500">Vandaag</p>
+        <h1 class="text-4xl font-semibold">${today}</h1>
       </div>
 
-      {/* Today's Schedule */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-medium text-gray-900">Planning van vandaag</h2>
-        
-        <div className="space-y-3">
-          {[
-            { tijd: '09:00', activiteit: 'Ontbijt & briefing', locatie: 'Eetzaal', verantwoordelijke: 'Lisa' },
-            { tijd: '10:30', activiteit: 'Speurtocht in het bos', locatie: 'Bosgebied achter kamp', verantwoordelijke: 'Mark & Sarah' },
-            { tijd: '12:30', activiteit: 'Lunch', locatie: 'Eetzaal', verantwoordelijke: 'Keukenteam' },
-            { tijd: '14:00', activiteit: 'Zwemmen bij het meer', locatie: 'Kampstrand', verantwoordelijke: 'Tom & Lisa' },
-            { tijd: '17:00', activiteit: 'Vrije tijd', locatie: 'Kampterrein', verantwoordelijke: '-' },
-            { tijd: '18:30', activiteit: 'Diner', locatie: 'Eetzaal', verantwoordelijke: 'Keukenteam' },
-            { tijd: '20:00', activiteit: 'Kampvuur & verhalen', locatie: 'Grote weide', verantwoordelijke: 'Yoeran' },
-          ].map((item, i) => (
-            <div 
-              key={i} 
-              className="group flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
-            >
-              {/* Time */}
-              <div className="flex-shrink-0 w-16">
-                <div className="flex items-center gap-1.5 text-gray-900">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="text-sm font-medium">{item.tijd}</span>
-                </div>
-              </div>
+      <h2 class="text-xl font-medium">Planning van vandaag</h2>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900">{item.activiteit}</h3>
-                <div className="mt-1 flex flex-col gap-1 text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{item.locatie}</span>
-                  </div>
-                  {item.verantwoordelijke !== '-' && (
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{item.verantwoordelijke}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+      ${[
+        ['09:00','Ontbijt & briefing','Eetzaal','Lisa'],
+        ['10:30','Speurtocht','Bos','Mark & Sarah'],
+        ['12:30','Lunch','Eetzaal','Keukenteam'],
+        ['14:00','Zwemmen','Meer','Tom & Lisa'],
+        ['18:30','Diner','Eetzaal','Keukenteam'],
+      ].map(item => `
+        <div class="bg-white border rounded-lg p-4 space-y-1">
+          <div class="font-medium">${item[0]} – ${item[1]}</div>
+          <div class="text-sm text-gray-600">${item[2]} • ${item[3]}</div>
         </div>
-      </div>
-
-      {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
-        {[
-          { title: 'Documenten', desc: 'Veiligheid & contacten', page: 'documenten', icon: FileText },
-          { title: 'Volledige planning', desc: 'Hele week bekijken', page: 'planningen', icon: Calendar },
-          { title: 'Ideeën', desc: 'Spellen & activiteiten', page: 'ideeen', icon: Lightbulb },
-        ].map((link) => {
-          const Icon = link.icon;
-          return (
-            <button
-              key={link.page}
-              onClick={() => setActivePage(link.page)}
-              className="group text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <Icon className="w-5 h-5 text-gray-600" />
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <h3 className="font-medium text-gray-900">{link.title}</h3>
-              <p className="text-sm text-gray-600 mt-0.5">{link.desc}</p>
-            </button>
-          );
-        })}
-      </div>
+      `).join('')}
     </div>
-  );
+  `;
+}
 
- const DocumentenPage = () => {
-  const [documenten, setDocumenten] = useState([]);
-  const [loading, setLoading] = useState(true);
+async function DocumentenPage() {
+  const res = await fetch(`${API_BASE}?action=getDocumenten`);
+  const docs = await res.json();
 
-  useEffect(() => {
-    fetch(`${API_BASE}?action=getDocumenten`)
-      .then(res => res.json())
-      .then(data => {
-        setDocumenten(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Documenten laden mislukt', err);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return <div className="text-gray-600">Documenten laden…</div>;
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Documenten</h1>
-          <p className="text-gray-600 mt-1">
-            Belangrijke informatie en protocollen
-          </p>
+  return `
+    <h1 class="text-3xl font-semibold mb-6">Documenten</h1>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      ${docs.map(d => `
+        <div class="bg-white border rounded-lg p-5">
+          <h3 class="font-medium">${d.titel}</h3>
+          <a href="${d.driveUrl}" target="_blank" class="text-sm text-gray-600 underline">
+            Bekijk document
+          </a>
         </div>
-        <button className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">
-          + Nieuw document
-        </button>
-      </div>
-
-      {documenten.length === 0 ? (
-        <p className="text-gray-600">Nog geen documenten.</p>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {documenten.map((doc, i) => (
-            <div
-              key={doc.id || i}
-              className="group bg-white border border-gray-200 hover:border-gray-300 rounded-lg p-5 hover:shadow-sm transition-all"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <FileText className="w-5 h-5 text-gray-600" />
-                <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
-                  {doc.type || 'Document'}
-                </span>
-              </div>
-
-              <h3 className="font-medium text-gray-900 mb-3">
-                {doc.titel}
-              </h3>
-
-              {doc.driveUrl && (
-                <a
-                  href={doc.driveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gray-600 hover:text-gray-900 font-medium group-hover:underline"
-                >
-                  Bekijk document →
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      `).join('')}
     </div>
-  );
+  `;
+}
+
+function renderNav() {
+  const navHtml = navItems.map(i => `
+    <button onclick="setPage('${i.id}')"
+      class="flex items-center gap-2 px-4 py-2 rounded-lg ${activePage === i.id ? 'bg-gray-100' : ''}">
+      <i data-lucide="${i.icon}"></i>${i.name}
+    </button>
+  `).join('');
+
+  desktopNav.innerHTML = navHtml;
+  mobileNav.innerHTML = navHtml;
+}
+
+async function render() {
+  renderNav();
+
+  let content = '';
+  if (activePage === 'start') content = StartPage();
+  if (activePage === 'documenten') content = await DocumentenPage();
+  if (activePage === 'planningen') content = '<h1 class="text-3xl">Planning</h1>';
+  if (activePage === 'ideeen') content = '<h1 class="text-3xl">Ideeën</h1>';
+  if (activePage === 'admin') content = '<h1 class="text-3xl">Admin</h1>';
+
+  document.getElementById('app').innerHTML = content;
+  lucide.createIcons();
+}
+
+menuBtn.onclick = () => {
+  sidebarOpen = !sidebarOpen;
+  mobileMenu.classList.toggle('hidden', !sidebarOpen);
 };
 
-
-  const PlanningenPage = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Volledige Planning</h1>
-          <p className="text-gray-600 mt-1">Activiteiten voor de hele week</p>
-        </div>
-        <button className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">
-          + Nieuwe activiteit
-        </button>
-      </div>
-
-      {/* Week Overview */}
-      <div className="space-y-6">
-        {['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'].map((dag) => (
-          <div key={dag} className="space-y-3">
-            <h2 className="text-lg font-medium text-gray-900 px-1">{dag}</h2>
-            <div className="space-y-2">
-              {[
-                { tijd: '09:00 - 10:00', activiteit: 'Ontbijt & briefing', locatie: 'Eetzaal' },
-                { tijd: '10:30 - 12:30', activiteit: 'Ochtendactiviteit', locatie: 'Variabel' },
-                { tijd: '12:30 - 14:00', activiteit: 'Lunch & rust', locatie: 'Eetzaal' },
-                { tijd: '14:00 - 17:00', activiteit: 'Middagactiviteit', locatie: 'Variabel' },
-                { tijd: '18:30 - 19:30', activiteit: 'Diner', locatie: 'Eetzaal' },
-                { tijd: '20:00 - 22:00', activiteit: 'Avondactiviteit', locatie: 'Variabel' },
-              ].map((item, i) => (
-                <div 
-                  key={i}
-                  className="flex items-center gap-4 p-3 bg-white border border-gray-200 hover:border-gray-300 rounded-lg hover:shadow-sm transition-all"
-                >
-                  <div className="flex-shrink-0 w-32 text-sm font-medium text-gray-600">
-                    {item.tijd}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.activiteit}</div>
-                    <div className="text-sm text-gray-600 mt-0.5">{item.locatie}</div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const IdeenPage = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Ideeën</h1>
-          <p className="text-gray-600 mt-1">Spellen, knutsels en activiteiten</p>
-        </div>
-        <button className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">
-          + Nieuw idee
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {['Alle', 'Spel', 'Knutsel', 'Sport', 'Avondactiviteit'].map((filter, i) => (
-          <button
-            key={filter}
-            className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
-              i === 0
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        {[
-          { title: 'Capture the Flag', type: 'Spel', duur: '60 min', deelnemers: '20-40' },
-          { title: 'Armbandjes maken', type: 'Knutsel', duur: '45 min', deelnemers: '10-20' },
-          { title: 'Voetbaltoernooi', type: 'Sport', duur: '120 min', deelnemers: '16-32' },
-          { title: 'Kampvuur verhalen', type: 'Avondactiviteit', duur: '60 min', deelnemers: 'Iedereen' },
-          { title: 'Touwspellen', type: 'Sport', duur: '45 min', deelnemers: '15-30' },
-          { title: 'Schilderen', type: 'Knutsel', duur: '90 min', deelnemers: '8-16' },
-        ].map((idea, i) => (
-          <div key={i} className="group bg-white border border-gray-200 hover:border-gray-300 rounded-lg p-5 hover:shadow-sm transition-all">
-            <div className="flex items-start justify-between mb-3">
-              <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
-                {idea.type}
-              </span>
-              <button className="text-gray-400 hover:text-yellow-500 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-              </button>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">{idea.title}</h3>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4" />
-                <span>{idea.duur}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-4 h-4" />
-                <span>{idea.deelnemers}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const AdminPage = () => (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-gray-900">Admin</h1>
-        <p className="text-gray-600 mt-1">Beheer gebruikers en instellingen</p>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Gebruikersbeheer</h2>
-        <p className="text-gray-600">Beheer functies komen hier...</p>
-      </div>
-    </div>
-  );
-
-  const renderPage = () => {
-    switch(activePage) {
-      case 'start': return <StartPage />;
-      case 'documenten': return <DocumentenPage />;
-      case 'planningen': return <PlanningenPage />;
-      case 'ideeen': return <IdeenPage />;
-      case 'admin': return <AdminPage />;
-      default: return <StartPage />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-                <span className="text-lg">⛺</span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-sm font-semibold text-gray-900">Marimba Kamp</h1>
-              </div>
-            </div>
-
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActivePage(item.id)}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      activePage === item.id
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* User */}
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 bg-gray-100 rounded-lg">
-                <div className="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                  Y
-                </div>
-                <span className="text-sm font-medium text-gray-900">Yoeran</span>
-              </div>
-              
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Menu */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-xl">
-            <div className="p-6 space-y-2 mt-16">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActivePage(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                      activePage === item.id
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {renderPage()}
-      </main>
-    </div>
-  );
-}
+render();
+</script>
+</body>
+</html>
