@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kamp Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Kamp – Admin</h1>
+  <p>Beheer planning, spellen en info</p>
+</header>
+
+<main style="padding: 15px;">
+
+  <!-- DAGEN & PLANNING -->
+  <div class="card">
+    <h2>📅 Dag & planning toevoegen</h2>
+
+    <input id="dagTitel" placeholder="Dag titel (bv. Dag 1 – Aankomst)">
+    <br><br>
+
+    <input id="tijd" placeholder="Tijd (09:30)">
+    <input id="activiteit" placeholder="Activiteit">
+    <input id="locatie" placeholder="Locatie">
+    <input id="begeleiders" placeholder="Begeleiders">
+    <br><br>
+
+    <button onclick="addPlanning()">➕ Voeg activiteit toe</button>
+    <p id="planningStatus"></p>
+  </div>
+
+  <!-- SPELLEN -->
+  <div class="card">
+    <h2>🎯 Spel toevoegen</h2>
+
+    <input id="spelNaam" placeholder="Naam spel">
+    <input id="spelOmschrijving" placeholder="Korte omschrijving">
+    <textarea id="spelRegels" placeholder="Spelregels"></textarea>
+    <input id="spelBenodigdheden" placeholder="Benodigdheden">
+    <input id="spelLocatie" placeholder="Locatie">
+    <input id="spelVerantwoordelijk" placeholder="Verantwoordelijk">
+    <br><br>
+
+    <button onclick="addSpel()">➕ Voeg spel toe</button>
+    <p id="spelStatus"></p>
+  </div>
+
+  <!-- PRAKTISCHE INFO -->
+  <div class="card">
+    <h2>ℹ️ Praktische info</h2>
+
+    <input id="infoTekst" placeholder="Nieuwe info-regel">
+    <button onclick="addInfo()">➕ Voeg info toe</button>
+
+    <ul id="infoLijst"></ul>
+  </div>
+
+  <!-- EXPORT / IMPORT -->
+  <div class="card">
+    <h2>💾 Opslaan</h2>
+    <button onclick="exportData()">📤 Exporteer kamp-data.json</button>
+    <br><br>
+    <input type="file" onchange="importData(event)">
+  </div>
+
+<div class="card">
+  <h2>📋 Overzicht planning</h2>
+  <div id="planningOverzicht"></div>
+</div>
+
+<div class="card">
+  <h2>🎯 Overzicht spellen</h2>
+  <div id="spellenOverzicht"></div>
+</div>
+
+<div class="card">
+  <h2>👀 Preview</h2>
+  <button onclick="openPreview()">Open preview</button>
+</div>
+
+</main>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

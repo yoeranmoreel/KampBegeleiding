@@ -1,0 +1,47 @@
+{
+  "dagen": [
+    {
+      "titel": "Dag 1 – Aankomst",
+      "planning": [
+        {
+          "tijd": "09:30",
+          "activiteit": "Vertrek school",
+          "locatie": "Schoolplein",
+          "begeleiders": "Iedereen"
+        },
+        {
+          "tijd": "11:00",
+          "activiteit": "Bosspel",
+          "locatie": "Bos",
+          "begeleiders": "Jan & Lisa"
+        }
+      ]
+    },
+    {
+      "titel": "Dag 2 – Activiteiten",
+      "planning": [
+        {
+          "tijd": "10:00",
+          "activiteit": "Zwemmen",
+          "locatie": "Zwembad",
+          "begeleiders": "Mark & Eva"
+        }
+      ]
+    }
+  ],
+  "spellen": [
+    {
+      "naam": "Bosspel",
+      "omschrijving": "Teams voeren opdrachten uit in het bos.",
+      "regels": "Teams volgen de route en voeren opdrachten uit.",
+      "benodigdheden": "Pionnen, kaartjes",
+      "locatie": "Bos",
+      "verantwoordelijk": "Jan & Lisa"
+    }
+  ],
+  "info": [
+    "Noodnummer: 06-12345678",
+    "EHBO ligt in de keuken",
+    "Medicatie bij hoofdbegeleider"
+  ]
+}
